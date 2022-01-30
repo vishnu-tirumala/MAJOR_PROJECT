@@ -1,0 +1,159 @@
+//IOTCLOUD737
+
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(8,9,10,11,12,13);
+unsigned int r = A8 ;
+unsigned int s = A0;
+unsigned int l =  A1;
+unsigned int trig = 50;
+unsigned int echo = 52;
+long dur;
+unsigned int distance;
+unsigned int r1 = 6;
+unsigned int r2 = 7;
+char c;
+
+unsigned int rain, ldr, wl, mois;
+
+void iot(String stringdata);
+
+void setup()
+{
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+  Serial2.begin(9600);
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  pinMode(r, INPUT);
+  pinMode(s, INPUT);
+  pinMode(l, INPUT);
+  pinMode(r1, OUTPUT);
+  pinMode(r2, OUTPUT);
+  lcd.begin(16, 2);
+  lcd.setCursor(0, 0);
+  lcd.print("   IOT BASED");
+  lcd.setCursor(0, 1);
+  lcd.print(" IRRIGAT SYSTEM");
+  delay(3000);
+  lcd.clear();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  while (Serial2.available() > 0)
+  {
+    lcd.clear();
+    c = Serial2.read();
+  }
+  switch (c)
+  {
+    case 'A':
+      lcd.setCursor(6, 0);
+      lcd.print("DRY");
+      lcd.setCursor(0, 1);
+      lcd.print("Pump motor 1 ON!");
+      digitalWrite(r1, HIGH);
+      iot("*DRY#");   
+      delay(3000);
+      digitalWrite(r1, LOW);
+      delay(1500);
+      lcd.clear();
+      break;
+
+    case 'B':
+      lcd.setCursor(6, 0);
+      lcd.print("WET");
+      iot("*WET#");
+      delay(3000);
+      lcd.clear();
+      break;
+
+    default:
+      break;
+  }
+  c = ' ';
+  rain = digitalRead(r);
+  wl = ultra();
+  ldr = 100 -((analogRead(l) * 10) / 102);
+  mois = 100 - ((analogRead(s) * 10) / 102);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("R = ");
+  lcd.print(rain);
+  lcd.setCursor(8, 0);
+  lcd.print("WL = ");
+  lcd.print(wl);
+  lcd.setCursor(0, 1);
+  lcd.print("L = ");
+  lcd.print(ldr);
+  lcd.setCursor(8, 1);
+  lcd.print("ML = ");
+  lcd.print(mois);
+  delay(3000);
+
+
+  if (rain == 0)
+  {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("RAIN DETECTED!");
+    lcd.setCursor(0, 1);
+    delay(3000);
+  }
+  if (mois < 30)
+  {
+    lcd.clear();
+    digitalWrite(r1, HIGH);
+    lcd.setCursor(0, 0);
+    lcd.print("Soil level LOW!");
+    lcd.setCursor(0, 1);
+    lcd.print("Pump motor 1 ON!");
+    iot("*Soil level LOW#");
+    delay(3000);
+    digitalWrite(r1, LOW);
+    delay(1500);
+  }
+  if (wl > 20)
+  {
+    lcd.clear();
+    digitalWrite(r2, HIGH);
+    lcd.setCursor(0, 0);
+    lcd.print("Water level LOW!");
+    lcd.setCursor(0, 1);
+    lcd.print("Pump motor 2 ON!");
+    iot("*Water level LOW#");
+    delay(3000);
+    digitalWrite(r2, LOW);
+    delay(1500);
+  }
+}
+
+
+int ultra()
+{
+  distance = 0;
+  dur = 0;
+  digitalWrite(trig, LOW);
+  delay(10);
+  digitalWrite(trig, HIGH);
+  delay(10);
+  digitalWrite(trig, LOW);
+  dur = pulseIn(echo, HIGH);
+  distance = ((dur * 0.034 ) / 2); //cm
+  Serial.println(distance);
+//  if (distance >= 100)
+//    distance = 0;
+//  else
+//    distance = (100 - distance);
+  return distance;
+}
+
+void iot(String stringdata)
+{
+  for (int i = 0; i < stringdata.length(); i++)
+  {
+    Serial2.write(stringdata[i]);
+  }
+  delay(3000);
+}
