@@ -15,18 +15,18 @@ figure; imshow(x); title('RGB Image');
 
 x=imresize(x,[200 178]);
 
-%% train the inoput images 
+%% train the input images 
 matlabroot='C:\Users\soura\Desktop\matlab code\dataset';
 
 Data=imageDatastore(matlabroot,'IncludeSubfolders',true,'LabelSource','foldernames');
-%% ------------ CRAETE CNN LAYERS -------------------%%
+%% ------------ CREATE CNN LAYERS -------------------%%
 % % image input layer inputs images to a network 
 layers=[imageInputLayer([200 178 3]) 
-%      The layer convolves the input by moving the filters along the input vertically and horizontally and computing the dot product of the weights and the input, and then adding a bias term.
+%      The layer convolves the input by moving the filters along the input vertically and horizontally and computing the dot product of the weights and the input and then adding a bias term.
 convolution2dLayer(5,20)
-% threshouling layers
+% thresholding layers
     reluLayer
-% A max pooling layer performs down-sampling by dividing the input into rectangular pooling regions, and computing the maximum of each region.    
+% A max-pooling layer performs down-sampling by dividing the input into rectangular pooling regions and computing the maximum of each region.    
    maxPooling2dLayer(2,'stride',2)
    
        convolution2dLayer(5,20)
